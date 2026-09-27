@@ -28,4 +28,22 @@ public class CryptoAsset {
 
     public Double getBuyPrice() { return buyPrice; }
     public void setBuyPrice(Double buyPrice) { this.buyPrice = buyPrice; }
+
+    private Double liquidationPrice;
+
+    public Double getLiquidationPrice() {
+        return liquidationPrice;
+    }
+
+    public void setLiquidationPrice(Double liquidationPrice) {
+        this.liquidationPrice = liquidationPrice;
+    }
+
+
+
+    @Transient // මෙය Database එකේ Table එකට එකතු නොවන බව පෙන්වයි
+    private Double currentPrice;
+
+    public Double getCurrentPrice() { return currentPrice; }
+    public void setCurrentPrice(Double currentPrice) { this.currentPrice = currentPrice; }
 }
