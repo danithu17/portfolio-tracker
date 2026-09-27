@@ -9,7 +9,7 @@ function App() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [quantity, setQuantity] = useState('');
   const [buyPrice, setBuyPrice] = useState('');
-  const [liqPrice, setLiqPrice] = useState(''); // අලුතින් එකතු කළ Liq Price state එක
+  const [liqPrice, setLiqPrice] = useState('');
 
   const fetchData = () => {
     fetch('http://localhost:8080/api/assets')
@@ -60,7 +60,7 @@ function App() {
       symbol: searchQuery,
       quantity: parseFloat(quantity),
       buyPrice: parseFloat(buyPrice),
-      liquidationPrice: liqPrice ? parseFloat(liqPrice) : 0 // Liq price එකක් දුන්නේ නැත්නම් 0 ලෙස සලකයි
+      liquidationPrice: liqPrice ? parseFloat(liqPrice) : 0
     };
 
     fetch('http://localhost:8080/api/assets', {
@@ -76,22 +76,21 @@ function App() {
             setBuyPrice('');
             setLiqPrice('');
           } else {
-            alert("Failed to add coin.");
+            console.error("Failed to add coin."); // Alert එක ඉවත් කර ඇත
           }
         })
         .catch(error => console.error("Error adding asset:", error));
   };
 
-  const handleDelete = (id, coinName) => {
-    if (window.confirm(`Are you sure you want to delete ${coinName}?`)) {
-      fetch(`http://localhost:8080/api/assets/${id}`, { method: 'DELETE' })
-          .then(response => {
-            if (response.ok) {
-              setAssets(prevAssets => prevAssets.filter(asset => asset.id !== id));
-            }
-          })
-          .catch(error => console.error("Error deleting asset:", error));
-    }
+  const handleDelete = (id) => {
+    // window.confirm එක ඉවත් කර ඇත
+    fetch(`http://localhost:8080/api/assets/${id}`, { method: 'DELETE' })
+        .then(response => {
+          if (response.ok) {
+            setAssets(prevAssets => prevAssets.filter(asset => asset.id !== id));
+          }
+        })
+        .catch(error => console.error("Error deleting asset:", error));
   };
 
   const totalInvested = assets.reduce((sum, asset) => sum + (asset.buyPrice * asset.quantity), 0);
@@ -107,7 +106,6 @@ function App() {
             My Crypto Portfolio
           </h1>
 
-          {/* --- Add Coin Form එක --- */}
           <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl mb-10">
             <h2 className="text-xl font-bold text-white mb-4">Add Asset (Spot / Futures)</h2>
             <form onSubmit={handleAddCoin} className="flex flex-col md:flex-row gap-4 relative">
@@ -158,7 +156,6 @@ function App() {
             </form>
           </div>
 
-          {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl relative overflow-hidden">
               <h2 className="text-slate-400 text-sm font-semibold uppercase tracking-wider mb-2">Current Balance</h2>
@@ -176,7 +173,6 @@ function App() {
             </div>
           </div>
 
-          {/* Table */}
           <div className="overflow-x-auto bg-slate-900 rounded-2xl shadow-2xl border border-slate-800">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -199,19 +195,17 @@ function App() {
                 const profitOrLoss = totalValue - totalCost;
                 const isProfit = profitOrLoss >= 0;
 
-                // Risk එක ගණනය කිරීම (Live Price එක Liq Price එකට කොපමණ ආසන්නද යන්න)
                 let riskStatus = "Safe";
                 let riskColor = "text-emerald-400 bg-emerald-500/10";
 
                 if (asset.liquidationPrice && asset.liquidationPrice > 0) {
-                  // සජීවී මිල සහ Liq මිල අතර පරතරය ප්‍රතිශතයක් ලෙස
                   const difference = Math.abs((livePrice - asset.liquidationPrice) / livePrice) * 100;
 
                   if (difference <= 5) {
-                    riskStatus = "CRITICAL ⚠️"; // 5% කට වඩා ළඟින් නම්
+                    riskStatus = "CRITICAL ⚠️";
                     riskColor = "text-rose-400 bg-rose-500/20 font-bold animate-pulse";
                   } else if (difference <= 15) {
-                    riskStatus = "Warning"; // 15% කට වඩා ළඟින් නම්
+                    riskStatus = "Warning";
                     riskColor = "text-yellow-400 bg-yellow-500/10";
                   }
                 } else {
@@ -234,7 +228,6 @@ function App() {
                       </td>
                       <td className="p-5 font-bold text-white">${livePrice.toFixed(2)}</td>
 
-                      {/* Risk Level පෙන්වන කොටුව */}
                       <td className="p-5">
                       <span className={`px-3 py-1 rounded-lg text-xs tracking-wide ${riskColor}`}>
                         {riskStatus}
@@ -245,7 +238,7 @@ function App() {
                         {isProfit ? '+' : ''}${profitOrLoss.toFixed(2)}
                       </td>
                       <td className="p-5 text-center">
-                        <button onClick={() => handleDelete(asset.id, asset.symbol)} className="bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors duration-200">
+                        <button onClick={() => handleDelete(asset.id)} className="bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors duration-200">
                           Del
                         </button>
                       </td>
